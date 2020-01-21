@@ -39,7 +39,7 @@ public class Server
 			Socket sc=ss.accept();
 			ObjectOutputStream oos=new ObjectOutputStream(sc.getOutputStream());
 			ObjectInputStream ois=new ObjectInputStream(sc.getInputStream());
-			ClientHandler auth=new ClientHandler(server,oos,ois);
+			ClientHandler auth=new ClientHandler(server,sc,oos,ois);
 			Thread t=new Thread(auth);
 			t.start();
 		}

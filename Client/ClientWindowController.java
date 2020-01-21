@@ -15,6 +15,7 @@ public class ClientWindowController implements Initializable
     public void SignIn() {
        System.out.println(username.getText()+" signed in with password "+password.getText());
        LoginStatus.setText(username.getText()+" signed in");
+       //add SHA-256 encryption
     }
     public void SignUp(){
         System.out.println(username.getText()+" signed up with password "+password.getText());
