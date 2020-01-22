@@ -29,14 +29,17 @@ public class Server
 		catch(SQLException e){
 			System.out.println("Connection to database could not be made");
 		}
+		System.out.println("Connection to database established");
 	}
-	public static void main(String args[])throws IOException
+	public static void main(String args[])throws Exception
 	{
 		Server server=new Server();
 		ServerSocket ss=new ServerSocket(5000);
 		while(true)
 		{
+			System.out.println("Waiting for client");
 			Socket sc=ss.accept();
+			System.out.println("Client Connected");
 			ObjectOutputStream oos=new ObjectOutputStream(sc.getOutputStream());
 			ObjectInputStream ois=new ObjectInputStream(sc.getInputStream());
 			ClientHandler auth=new ClientHandler(server,sc,oos,ois);

@@ -37,7 +37,12 @@ public class ClientHandler implements Runnable
 				//Send successful login message to client
 				sendAuthentication(true,"Login Succes");
 				//Empty the table of username into oos
-				server.msh.remove(username,oos);
+				System.out.println("User authenticated successfully");
+				try{
+					server.msh.remove(user.username,oos);
+				}catch(Exception e){
+					System.out.println("Some Error Occured");
+				}
 				startService();
 			}
 			else
@@ -57,11 +62,13 @@ public class ClientHandler implements Runnable
 		else
 		{
 			SignupClass temp=(SignupClass)obj;
+			System.out.println("Signing Up New User");
 			try{
 				server.msh.insertUser(temp);
 			}catch(Exception e){
 				System.out.println("Could not add user");
 			}
+			System.out.println("User added");
 		}
 	}
 
@@ -107,7 +114,13 @@ public class ClientHandler implements Runnable
 					}
 				}
 				else //If user is offline 
-					server.msh.insertMessage(receiver,ms);
+				{
+					try{
+						server.msh.insertMessage(receiver,ms);
+					}catch(Exception e){
+						System.out.println("Some Error Occured");
+					}
+				}
 			}
 			else if(obj instanceof SystemMessage)
 			{
@@ -168,6 +181,7 @@ public class ClientHandler implements Runnable
 	public boolean authenticate()
 	{
 		//we find the password of this user
+		System.out.println("Authenticating User");
 		try{
 			String query="SELECT Password FROM UserTable WHERE UserName='"+user.username+"'";
 			PreparedStatement preStat=server.connection.prepareStatement(query);
