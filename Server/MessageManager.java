@@ -48,7 +48,7 @@ public class MessageManager
 	{
 		//we connect to the table of the user
 		String table=username+"Table";
-		String query="SELECT * FROM"+table;
+		String query="SELECT * FROM "+table;
 		PreparedStatement preStat=server.connection.prepareStatement(query);
 		ResultSet result=preStat.executeQuery();
 		while(result.next())

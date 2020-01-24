@@ -35,13 +35,13 @@ public class ClientHandler implements Runnable
 			if(authenticate())
 			{
 				//Send successful login message to client
-				sendAuthentication(true,"Login Succes");
+				sendAuthentication(true,"Login Success");
 				//Empty the table of username into oos
 				System.out.println("User authenticated successfully");
 				try{
 					server.msh.remove(user.username,oos);
 				}catch(Exception e){
-					System.out.println("Some Error Occured");
+					System.out.println("Could not access user messages");
 				}
 				startService();
 			}
@@ -68,6 +68,7 @@ public class ClientHandler implements Runnable
 			}catch(Exception e){
 				System.out.println("Could not add user");
 			}
+			sendAuthentication(true,"Login Success");
 			System.out.println("User added");
 		}
 	}
@@ -175,7 +176,7 @@ public class ClientHandler implements Runnable
 			oos.writeObject(auth);
 			oos.flush();
 		}catch(Exception e){
-			System.out.println("Some Error Occured");
+			System.out.println("Authentication message sending failed");
 		}
 	}
 	public boolean authenticate()

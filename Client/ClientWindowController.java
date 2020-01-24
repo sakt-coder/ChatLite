@@ -3,7 +3,9 @@ import java.util.*;
 import javafx.scene.control.*;
 import javafx.scene.*;
 import javafx.fxml.*;
-public class ClientWindowController implements Initializable
+import java.io.*;
+//this class interacts with the client window
+public class ClientWindowController
 {
     @FXML TextField username;
     @FXML PasswordField password;
@@ -12,22 +14,18 @@ public class ClientWindowController implements Initializable
     @FXML TextField SendTo;
     @FXML Label LoginStatus;
     @FXML Label MessageSent;
-    public void SignIn() {
-       System.out.println(username.getText()+" signed in with password "+password.getText());
-       LoginStatus.setText(username.getText()+" signed in");
-       //add SHA-256 encryption
+    Client client;
+    public void SignIn()throws Exception {
+       User user=new User(username.getText(),password.getText());
+       client.oos.writeObject(user);
     }
-    public void SignUp(){
-        System.out.println(username.getText()+" signed up with password "+password.getText());
-        LoginStatus.setText("New User "+username.getText()+" created");
+    public void SignUp()throws Exception{
+        SignupClass temp=new SignupClass(username.getText(),password.getText());
+        client.oos.writeObject(temp);
     }
     public void SendMessage()
     {
         System.out.println(SendMessageText.getText()+" sent to "+SendTo.getText());
         MessageSent.setText("Message Sent");
-    }
-    public void initialize(URL url,ResourceBundle rb)
-    {
-
     }
 }

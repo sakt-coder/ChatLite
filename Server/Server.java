@@ -23,8 +23,10 @@ public class Server
 			System.out.println("JDBC Driver for SQL not found");
 		}
 		String url="jdbc:mysql://127.0.0.1:3306/Chat_App";
+		System.out.println("Enter root password");
+		String root_password=new Scanner(System.in).nextLine();
 		try{
-			connection=DriverManager.getConnection(url,"root","hearmeroar");
+			connection=DriverManager.getConnection(url,"root",root_password);
 		}
 		catch(SQLException e){
 			System.out.println("Connection to database could not be made");

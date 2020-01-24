@@ -14,7 +14,14 @@ public class testClient
 		ObjectOutputStream oos=new ObjectOutputStream(socket.getOutputStream());
 		ObjectInputStream ois=new ObjectInputStream(socket.getInputStream());
 		User obj=new User("Nikhil","123456");
+		Thread.sleep(5000);
 		oos.writeObject(obj);
+		Object ob=ois.readObject();
+		if(ob instanceof Authentication)
+		{
+			Authentication a=(Authentication)ob;
+			System.out.println(a.error);
+		}
 		socket.close();
 	}
 }
