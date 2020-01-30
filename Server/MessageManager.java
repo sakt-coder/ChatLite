@@ -27,7 +27,7 @@ public class MessageManager
 	{
 		String query="INSERT INTO "+receiver+"Table VALUES (?, ?, ?, ?)";
 		PreparedStatement preStat=server.connection.prepareStatement(query);
-		preStat.setString(1,receiver);
+		preStat.setString(1,ms.getFrom());
 		preStat.setInt(2,0);
 		preStat.setString(3,ms.getContent());
 		preStat.setTimestamp(4,ms.getSentTime());

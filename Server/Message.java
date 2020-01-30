@@ -48,4 +48,9 @@ public class Message implements Serializable
 	{
 		seenTime=t;
 	}
+	public String toString()
+	{
+		String s=from+": "+content+" "+sentTime+"\n";
+		return s;
+	}
 }

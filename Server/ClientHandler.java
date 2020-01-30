@@ -87,7 +87,7 @@ public class ClientHandler implements Runnable
 			try{
 				obj=ois.readObject();
 			}catch(Exception e){
-				System.out.println("Some Error Occured");
+				System.out.println("Cannot receive object from client");
 				break;
 			}
 			if(obj instanceof Message)
@@ -103,7 +103,7 @@ public class ClientHandler implements Runnable
 						oosTo.writeObject(ms);
 						oosTo.flush();
 					}catch(Exception e){
-						System.out.println("Some Error Occured");
+						System.out.println("Could not direct message");
 					}
 					//sent success system message
 					SystemMessage sm=new SystemMessage(ms.getTo(),1,ms.getSentTime());
@@ -111,7 +111,7 @@ public class ClientHandler implements Runnable
 						oos.writeObject(sm);
 						oos.flush();
 					}catch(Exception e){
-						System.out.println("Some Error Occured");
+						System.out.println("Could not send System message");
 					}
 				}
 				else //If user is offline 
@@ -167,6 +167,7 @@ public class ClientHandler implements Runnable
 				break;
 			}
 		}
+		sendAuthentication(true,"Logged Out");
 	}
 	public void sendAuthentication(boolean flag,String error)
 	{

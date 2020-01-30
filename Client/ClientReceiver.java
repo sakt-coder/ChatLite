@@ -7,6 +7,7 @@ public class ClientReceiver implements Runnable
 {
 	Client client;
 	ClientWindowController controller;
+	StringBuilder msb=new StringBuilder();
 	ClientReceiver(Client client)
 	{
 		this.client=client;
@@ -24,7 +25,13 @@ public class ClientReceiver implements Runnable
 				Object obj=client.ois.readObject();
 				if(obj instanceof Message)
 				{
-
+					Message ms=(Message)obj;
+					msb.append(ms.toString());
+					Platform.runLater(new Runnable(){
+						public void run(){
+							controller.MessageLabel.setText(msb.length()==0?"You have no messages":msb.toString());
+						}
+					});
 				}
 				else if(obj instanceof Authentication)
 				{
@@ -35,10 +42,16 @@ public class ClientReceiver implements Runnable
 							controller.LoginStatus.setText(auth.error);
 						}
 					});
+					if(auth.error.equals("Logged Out")){
+						client.ois.close();
+						client.oos.close();
+						break;
+					}
 				}
 				else if(obj instanceof SystemMessage)
 				{
-
+					SystemMessage sm=(SystemMessage)obj;
+					
 				}
 			}
 		}
