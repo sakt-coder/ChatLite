@@ -114,12 +114,12 @@ public class ClientHandler implements Runnable
 						System.out.println("Could not send System message");
 					}
 				}
-				else //If user is offline 
+				// else //If user is offline 
 				{
 					try{
 						server.msh.insertMessage(receiver,ms);
 					}catch(Exception e){
-						System.out.println("Some Error Occured");
+						System.out.println("No Such User");
 					}
 				}
 			}

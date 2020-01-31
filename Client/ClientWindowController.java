@@ -17,19 +17,33 @@ public class ClientWindowController
     @FXML Label MessageSent;
     Client client;
     int count;
+    boolean isLogged;
     public void SignIn()throws Exception {
-       User user=new User(username.getText(),password.getText());
-       client.oos.writeObject(user);
+        if(isLogged==false){
+            User user=new User(username.getText(),password.getText());
+            client=new Client(this);
+            client.oos.writeObject(user);
+            isLogged=true;
+        }
+        else{
+            LoginStatus.setText("Logout First");
+        }
     }
     public void SignUp()throws Exception{
-        SignupClass temp=new SignupClass(username.getText(),password.getText());
-        client.oos.writeObject(temp);
+        if(isLogged==false){
+            SignupClass temp=new SignupClass(username.getText(),password.getText());
+            client.oos.writeObject(temp);
+        }
+        else{
+            LoginStatus.setText("Logout First");
+        }
     }
     public void logout()throws Exception{
         SystemMessage sm=new SystemMessage(username.getText(),-1,new Timestamp(System.currentTimeMillis()));
         System.out.println("Logged out");
         client.oos.writeObject(sm);
-        System.out.println("Sent System Message");
+        isLogged=false;
+        MessageLabel.setText("Messages will be displayed here");
     }
     public void SendMessage()
     {

@@ -16,13 +16,13 @@ public class ClientWindow extends Application{
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("ClientWindow.fxml"));
         Parent root = loader.load();
-        Client client=new Client();
-        ClientReceiver clientReceiver=new ClientReceiver(client);
-        Thread t=new Thread(clientReceiver);
-        t.start();
-        ClientWindowController controller=loader.getController();
-        controller.client=client;
-        clientReceiver.setController(controller);
+        // Client client=new Client();
+        // ClientReceiver clientReceiver=new ClientReceiver(client);
+        // Thread t=new Thread(clientReceiver);
+        // t.start();
+        // ClientWindowController controller=loader.getController();
+        // controller.client=client;
+        // clientReceiver.setController(controller);
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.show();

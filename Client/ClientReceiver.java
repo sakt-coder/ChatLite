@@ -11,6 +11,7 @@ public class ClientReceiver implements Runnable
 	ClientReceiver(Client client)
 	{
 		this.client=client;
+		// controller=client.controller;
 	}
 	public void setController(ClientWindowController controller)
 	{

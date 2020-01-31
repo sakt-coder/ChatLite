@@ -24,7 +24,7 @@ public class Server
 		}
 		String url="jdbc:mysql://127.0.0.1:3306/Chat_App";
 		System.out.println("Enter root password");
-		String root_password=new Scanner(System.in).nextLine();
+		String root_password=new String(System.console().readPassword());
 		try{
 			connection=DriverManager.getConnection(url,"root",root_password);
 		}
