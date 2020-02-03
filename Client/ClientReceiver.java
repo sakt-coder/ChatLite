@@ -41,9 +41,14 @@ public class ClientReceiver implements Runnable
 					Platform.runLater(new Runnable(){
 						public void run(){
 							controller.LoginStatus.setText(auth.error);
+							if(auth.error.equals("Login Success"))
+								controller.isLogged=true;
+							else if(auth.error.equals("Logged Out"))
+								controller.isLogged=false;
 						}
 					});
 					if(auth.error.equals("Logged Out")){
+
 						client.ois.close();
 						client.oos.close();
 						break;

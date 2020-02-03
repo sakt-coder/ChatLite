@@ -6,7 +6,8 @@ public class Client
 	public ObjectOutputStream oos;
 	public ObjectInputStream ois;
 	public ClientWindowController controller;
-	Client(ClientWindowController controller)
+	public String username;
+	Client(ClientWindowController controller,String username)
 	{
 		//connecting to server and initializing client
 		try{
@@ -19,6 +20,7 @@ public class Client
 		System.out.println("Connected to Server");
 		ClientReceiver clientReceiver=new ClientReceiver(this);
 		clientReceiver.setController(controller);
+		this.username=username;
         Thread t=new Thread(clientReceiver);
         t.start();
 	}

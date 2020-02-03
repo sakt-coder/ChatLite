@@ -5,16 +5,12 @@ import java.util.*;
 import javafx.util.Pair;
 public class Server
 {
-	public ArrayList<Pair<String,Socket>> activeList;
-	public ArrayList<Pair<ObjectInputStream,ObjectOutputStream>> activeUserStreams;
-	public ArrayList<ClientHandler> handlers;
+	public HashMap<String,ObjectOutputStream> activeUserMap;
 	public MessageManager msh;
 	public Connection connection;
 	Server()
 	{
-		activeList=new ArrayList<>();
-		activeUserStreams=new ArrayList<>();
-		handlers=new ArrayList<>();
+		activeUserMap=new HashMap<>();
 		msh=new MessageManager(this);
 		try{
 			Class.forName("com.mysql.cj.jdbc.Driver");

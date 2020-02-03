@@ -33,16 +33,6 @@ public class MessageManager
 		preStat.setTimestamp(4,ms.getSentTime());
 		preStat.executeUpdate();
 	}
-	//find returns the oos of the receiver
-	public ObjectOutputStream find(String receiver)
-	{
-		for(int i=0;i<server.activeList.size();i++)
-		{
-			if(server.activeList.get(i).getKey().equals(receiver))
-				return server.activeUserStreams.get(i).getValue();
-		}
-		return null;
-	}
 	//returns all the messages sent to this user when he was offline
 	public void remove(String username,ObjectOutputStream oos)throws Exception
 	{

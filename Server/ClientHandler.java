@@ -9,7 +9,8 @@ public class ClientHandler implements Runnable
 	Socket socket;
 	ObjectOutputStream oos;
 	ObjectInputStream ois;
-	User user;
+	String username;
+	String password;
 	ClientHandler(Server server,Socket socket,ObjectOutputStream oos,ObjectInputStream ois)
 	{
 		this.server=server;
@@ -31,9 +32,11 @@ public class ClientHandler implements Runnable
 		//If existing user login, then we receive a User object
 		if(obj instanceof User)
 		{
-			user=(User)obj;
+			User user=(User)obj;
 			if(authenticate())
 			{
+				username=user.username;
+				password=user.password;
 				//Send successful login message to client
 				sendAuthentication(true,"Login Success");
 				//Empty the table of username into oos
@@ -70,6 +73,9 @@ public class ClientHandler implements Runnable
 			}
 			sendAuthentication(true,"Login Success");
 			System.out.println("User added");
+			username=temp.username;
+			password=temp.password;
+			startService();
 		}
 	}
 
@@ -77,9 +83,7 @@ public class ClientHandler implements Runnable
 	{
 		Timestamp time=null;
 		//add user to server lists
-		server.activeList.add(new Pair<String,Socket>(user.username,socket));
-		server.activeUserStreams.add(new Pair<>(ois,oos));
-		server.handlers.add(this);
+		server.activeUserMap.put(username,oos);
 		while(true)
 		{
 			//receive messages or system messages
@@ -144,29 +148,13 @@ public class ClientHandler implements Runnable
 
 	public ObjectOutputStream find(String receiver)
 	{
-		for(int i=0;i<server.activeList.size();i++)
-		{
-			if(server.activeList.get(i).getKey().equals(receiver))
-			{
-				return server.activeUserStreams.get(i).getValue();
-			}
-		}
-		return null;
+		return server.activeUserMap.getOrDefault(receiver,null);
 	}
 
 	public void logout(Timestamp time)
 	{
 		//find user and remove him from server lists
-		for(int i=0;i<server.activeList.size();i++)
-		{
-			if(server.activeList.get(i).getKey().equals(user.username))
-			{
-				server.activeList.remove(i);
-				server.activeUserStreams.remove(i);
-				server.handlers.remove(i);
-				break;
-			}
-		}
+		server.activeUserMap.remove(username);
 		sendAuthentication(true,"Logged Out");
 	}
 	public void sendAuthentication(boolean flag,String error)
@@ -185,13 +173,13 @@ public class ClientHandler implements Runnable
 		//we find the password of this user
 		System.out.println("Authenticating User");
 		try{
-			String query="SELECT Password FROM UserTable WHERE UserName='"+user.username+"'";
+			String query="SELECT Password FROM UserTable WHERE UserName='"+username+"'";
 			PreparedStatement preStat=server.connection.prepareStatement(query);
 			ResultSet rs=preStat.executeQuery(query);
 			if(rs.next())
 			{
 				//match the passwords
-				if(user.password.equals(rs.getString("Password")))
+				if(password.equals(rs.getString("Password")))
 					return true;
 				else
 					return false;
