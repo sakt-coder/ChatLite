@@ -1,6 +1,11 @@
 import java.io.*;
 import java.net.*;
 import java.sql.*;
+import java.sql.Timestamp;
+import java.util.*;
+import javax.crypto.*;
+import java.security.spec.*;
+import java.security.*;
 import javafx.util.Pair;
 
 public class ClientHandler implements Runnable
@@ -33,7 +38,7 @@ public class ClientHandler implements Runnable
 		if(obj instanceof User)
 		{
 			User user=(User)obj;
-			if(authenticate())
+			if(authenticate(user))
 			{
 				username=user.username;
 				password=user.password;
@@ -136,6 +141,34 @@ public class ClientHandler implements Runnable
 					break;
 				}
 			}
+			else if(obj instanceof Request)
+			{
+				Request req=(Request)obj;
+				String query="SELECT PublicKey FROM UserTable WHERE UserName='"+req.username+"'";
+				String publicKey=null;
+				PublicKey puk=null;
+				try
+				{
+					PreparedStatement preStat=server.connection.prepareStatement(query);
+					ResultSet rs=preStat.executeQuery(query);
+					if(rs.next())
+						publicKey=rs.getString("PublicKey");
+	            	KeyFactory factory=KeyFactory.getInstance("RSA");
+					puk=(PublicKey)factory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey)));
+
+				}
+				catch(Exception e){
+					System.out.println("Some Error Occured");
+				}
+				ObjectOutputStream oosTo=find(req.from);
+				try{
+						oosTo.writeObject(puk);
+						oosTo.flush();
+					}catch(Exception e){
+						System.out.println("Could not direct message");
+					}
+				System.out.println("Public Key Sent");
+			}
 			else
 			{
 				System.out.println("Some Error Occured");
@@ -168,18 +201,18 @@ public class ClientHandler implements Runnable
 			System.out.println("Authentication message sending failed");
 		}
 	}
-	public boolean authenticate()
+	public boolean authenticate(User user)
 	{
 		//we find the password of this user
 		System.out.println("Authenticating User");
 		try{
-			String query="SELECT Password FROM UserTable WHERE UserName='"+username+"'";
+			String query="SELECT Password FROM UserTable WHERE UserName='"+user.username+"'";
 			PreparedStatement preStat=server.connection.prepareStatement(query);
 			ResultSet rs=preStat.executeQuery(query);
 			if(rs.next())
 			{
 				//match the passwords
-				if(password.equals(rs.getString("Password")))
+				if(user.password.equals(rs.getString("Password")))
 					return true;
 				else
 					return false;

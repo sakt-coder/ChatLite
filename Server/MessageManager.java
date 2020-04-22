@@ -11,10 +11,11 @@ public class MessageManager
 	public void insertUser(SignupClass sc)throws SQLException
 	{
 		//UserTable contains the username and password for all users
-		String query="INSERT INTO UserTable VALUES (?, ?)";
+		String query="INSERT INTO UserTable VALUES (?,?,?)";
 		PreparedStatement preStat=server.connection.prepareStatement(query);
 		preStat.setString(1,sc.username);
 		preStat.setString(2,sc.password);
+		preStat.setString(3,sc.publicKey);
 		preStat.executeUpdate();
 		//we create a new table in our database
 		String table=sc.username+"Table";
