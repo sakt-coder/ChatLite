@@ -1,6 +1,6 @@
-# ChatLite
+# SecureChat
 TODO persistent login - remember me for a month
-TODO rsa encryption - end to end
+DONE - TODO rsa encryption - end to end 
 TODO self-destructing messages
 TODO add tor support
 
@@ -12,4 +12,4 @@ private is stored in client device
 To redeem messages, decrypt using your private key
 To send messages, encrypt using receivers public key
 
-Separate Client database from Server Database
+TODO - Separate Client database from Server Database
