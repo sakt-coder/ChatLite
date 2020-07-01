@@ -2,13 +2,9 @@ import java.sql.Timestamp;
 import java.io.Serializable;
 public class SystemMessage implements Serializable
 {
-	String sender;
-	int id;
-	Timestamp time;
-	public SystemMessage(String sender,int id,Timestamp time)
+	String note;
+	public SystemMessage(String note)
 	{
-		this.sender=sender;
-		this.id=id;
-		this.time=time;
+		this.note=note;
 	}
 }

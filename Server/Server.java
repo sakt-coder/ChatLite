@@ -1,46 +1,37 @@
+import MyTor.*;
 import java.io.*;
 import java.net.*;
 import java.sql.*;
 import java.util.*;
 import javafx.util.Pair;
+
 public class Server
 {
-	public HashMap<String,ObjectOutputStream> activeUserMap;
+	public HashMap<String,TorSocket> activeUserMap;
 	public MessageManager msh;
 	public Connection connection;
-	Server()
+	Server()throws Exception
 	{
 		activeUserMap=new HashMap<>();
 		msh=new MessageManager(this);
-		try{
-			Class.forName("com.mysql.cj.jdbc.Driver");
-		}
-		catch(ClassNotFoundException e){
-			System.out.println("JDBC Driver for SQL not found");
-		}
+		
+		Class.forName("com.mysql.cj.jdbc.Driver");
 		String url="jdbc:mysql://127.0.0.1:3306/Chat_App";
 		System.out.println("Enter root password");
 		String root_password=new String(System.console().readPassword());
-		try{
-			connection=DriverManager.getConnection(url,"root",root_password);
-		}
-		catch(SQLException e){
-			System.out.println("Connection to database could not be made");
-		}
-		System.out.println("Connection to database established");
+		
+		connection=DriverManager.getConnection(url,"root",root_password);
 	}
 	public static void main(String args[])throws Exception
 	{
 		Server server=new Server();
-		ServerSocket ss=new ServerSocket(5000);
+		TorServer ss=new TorServer(5000);
 		while(true)
 		{
 			System.out.println("Waiting for client");
-			Socket sc=ss.accept();
-			System.out.println("Client Connected");
-			ObjectOutputStream oos=new ObjectOutputStream(sc.getOutputStream());
-			ObjectInputStream ois=new ObjectInputStream(sc.getInputStream());
-			ClientHandler auth=new ClientHandler(server,sc,oos,ois);
+			TorSocket ts=ss.accept();
+			System.out.println("New Client Connected");
+			ClientHandler auth=new ClientHandler(server,ts);
 			Thread t=new Thread(auth);
 			t.start();
 		}

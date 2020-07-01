@@ -1,3 +1,4 @@
+import MyTor.*;
 import java.io.*;
 import java.net.*;
 import java.sql.*;
@@ -11,28 +12,28 @@ import javafx.util.Pair;
 public class ClientHandler implements Runnable
 {
 	Server server;
-	Socket socket;
-	ObjectOutputStream oos;
-	ObjectInputStream ois;
+	TorSocket socket;
 	String username;
-	String password;
-	ClientHandler(Server server,Socket socket,ObjectOutputStream oos,ObjectInputStream ois)
+	ClientHandler(Server server,TorSocket socket)
 	{
 		this.server=server;
 		this.socket=socket;
-		this.oos=oos;
-		this.ois=ois;
 	}
 	public void run()
 	{
+		try
+		{
+			readLogin();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	private void readLogin()throws Exception
+	{
 		//Reading Login Details of Client
-		Object obj=null;
-		try{
-			obj=ois.readObject();
-		}
-		catch(Exception e){
-			System.out.println("No response from client");
-		}
+		Object obj=socket.readObject();
 
 		//If existing user login, then we receive a User object
 		if(obj instanceof User)
@@ -41,184 +42,98 @@ public class ClientHandler implements Runnable
 			if(authenticate(user))
 			{
 				username=user.username;
-				password=user.password;
-				//Send successful login message to client
-				sendAuthentication(true,"Login Success");
-				//Empty the table of username into oos
-				System.out.println("User authenticated successfully");
-				try{
-					server.msh.remove(user.username,oos);
-				}catch(Exception e){
-					System.out.println("Could not access user messages");
-				}
+				sendSystemMessage("Login Success");
+				server.msh.remove(user.username,socket);//Display old messages
 				startService();
 			}
 			else
-			{
-				//Send failed authentication message to client
-				sendAuthentication(false,"Invalid Login");
-			}
-			try{
-				this.oos.close();
-				this.ois.close();
-				this.socket.close();
-			}catch(Exception e){
-				System.out.println("Some Error Occured");
-			}
+				sendSystemMessage("Invalid Login");
+			this.socket.close();
 		}
 		//If new user login, then we receive a SignupClass Object
 		else
 		{
 			SignupClass temp=(SignupClass)obj;
-			System.out.println("Signing Up New User");
-			try{
-				server.msh.insertUser(temp);
-			}catch(Exception e){
-				System.out.println("Could not add user");
-			}
-			sendAuthentication(true,"Login Success");
+			server.msh.insertUser(temp);
+			sendSystemMessage("Login Success");
 			System.out.println("User added");
 			username=temp.username;
-			password=temp.password;
 			startService();
 		}
 	}
 
-	public void startService()
+	private void startService()throws Exception
 	{
-		Timestamp time=null;
-		//add user to server lists
-		server.activeUserMap.put(username,oos);
+		server.activeUserMap.put(username,socket);//add user to activeUserMap
 		while(true)
 		{
-			//receive messages or system messages
-			Object obj;
-			try{
-				obj=ois.readObject();
-			}catch(Exception e){
-				System.out.println("Cannot receive object from client");
-				break;
-			}
+			Object obj=socket.readObject();
 			if(obj instanceof Message)
 			{
 				Message ms=(Message)obj;
+				MessageContent mc=(MessageContent)socket.readObject();
+
 				String receiver = ms.getTo();
-				ObjectOutputStream oosTo=find(receiver);
-				if(oosTo!=null)//If user is online
+				TorSocket tsTo=find(receiver);
+				if(tsTo!=null)//If user is online
 				{
-					//send message to receiver
-					ms.setReceivedTime(ms.getSentTime());
-					try{
-						oosTo.writeObject(ms);
-						oosTo.flush();
-					}catch(Exception e){
-						System.out.println("Could not direct message");
-					}
-					//sent success system message
-					SystemMessage sm=new SystemMessage(ms.getTo(),1,ms.getSentTime());
-					try{
-						oos.writeObject(sm);
-						oos.flush();
-					}catch(Exception e){
-						System.out.println("Could not send System message");
-					}
+					tsTo.writeObject(ms);
+					tsTo.writeObject(mc);
+					tsTo.flush();
 				}
-				// else //If user is offline 
-				{
-					try{
-						server.msh.insertMessage(receiver,ms);
-					}catch(Exception e){
-						System.out.println("No Such User");
-					}
-				}
+				else //If user is offline 
+					server.msh.insertMessage(receiver,ms,mc);
 			}
-			else if(obj instanceof SystemMessage)
+			else if(obj instanceof SystemMessage)//If we receive a system message to logout
 			{
-				//If we receive a system message to logout
-				SystemMessage sm=(SystemMessage)obj;
-				if(sm.id==-1){
-					time=sm.time;
-					break;
-				}
+				break;
 			}
-			else if(obj instanceof Request)
+			else if(obj instanceof Request)//Request for PublicKey
 			{
 				Request req=(Request)obj;
 				String query="SELECT PublicKey FROM UserTable WHERE UserName='"+req.username+"'";
 				String publicKey=null;
-				PublicKey puk=null;
-				try
-				{
-					PreparedStatement preStat=server.connection.prepareStatement(query);
-					ResultSet rs=preStat.executeQuery(query);
-					if(rs.next())
-						publicKey=rs.getString("PublicKey");
-	            	KeyFactory factory=KeyFactory.getInstance("RSA");
-					puk=(PublicKey)factory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey)));
 
-				}
-				catch(Exception e){
-					System.out.println("Some Error Occured");
-				}
-				ObjectOutputStream oosTo=find(req.from);
-				try{
-						oosTo.writeObject(puk);
-						oosTo.flush();
-					}catch(Exception e){
-						System.out.println("Could not direct message");
-					}
-				System.out.println("Public Key Sent");
-			}
-			else
-			{
-				System.out.println("Some Error Occured");
-				break;
+				Statement st=server.connection.createStatement();
+				ResultSet rs=st.executeQuery(query);
+				if(rs.next())
+					publicKey=rs.getString("PublicKey");
+
+				TorSocket tsTo=find(req.from);
+				tsTo.writeObject(publicKey);
+				tsTo.flush();
 			}
 		}
-		//logging out
-		logout(time);
+		logout();
 	}
 
-	public ObjectOutputStream find(String receiver)
+	private TorSocket find(String receiver)
 	{
 		return server.activeUserMap.getOrDefault(receiver,null);
 	}
 
-	public void logout(Timestamp time)
+	private void logout()throws Exception
 	{
-		//find user and remove him from server lists
 		server.activeUserMap.remove(username);
-		sendAuthentication(true,"Logged Out");
+		sendSystemMessage("Logged Out");
 	}
-	public void sendAuthentication(boolean flag,String error)
+	private void sendSystemMessage(String note)throws Exception
 	{
-		//send authentication message of invalid or successful login
-		Authentication auth=new Authentication(flag,error);
-		try{
-			oos.writeObject(auth);
-			oos.flush();
-		}catch(Exception e){
-			System.out.println("Authentication message sending failed");
-		}
+		SystemMessage sm=new SystemMessage(note);
+		socket.writeObject(sm);
+		socket.flush();
 	}
-	public boolean authenticate(User user)
+	private boolean authenticate(User user)throws Exception
 	{
-		//we find the password of this user
-		System.out.println("Authenticating User");
-		try{
-			String query="SELECT Password FROM UserTable WHERE UserName='"+user.username+"'";
-			PreparedStatement preStat=server.connection.prepareStatement(query);
-			ResultSet rs=preStat.executeQuery(query);
-			if(rs.next())
-			{
-				//match the passwords
-				if(user.password.equals(rs.getString("Password")))
-					return true;
-				else
-					return false;
-			}
-		}catch(Exception e){
-			System.out.println("Some Error Occured");
+		String query="SELECT Password FROM UserTable WHERE UserName='"+user.username+"'";
+		Statement st=server.connection.createStatement();
+		ResultSet rs=st.executeQuery(query);
+		if(rs.next())
+		{
+			if(user.password.equals(rs.getString("Password")))
+				return true;
+			else
+				return false;
 		}
 		return false;
 	}

@@ -1,9 +1,10 @@
+import MyTor.*;
 import java.io.*;
 import java.net.*;
 import java.sql.*;
 public class Client
 {
-	public Socket socket;
+	public TorObjectStream tos;
 	public ObjectOutputStream oos;
 	public ObjectInputStream ois;
 	public ClientWindowController controller;
@@ -13,9 +14,9 @@ public class Client
 	{
 		//connecting to server and initializing client
 		try{
-			socket=new Socket("localhost",5000);
-			oos=new ObjectOutputStream(socket.getOutputStream());
-			ois=new ObjectInputStream(socket.getInputStream());
+			tos=new TorObjectStream("localhost",5000);
+			// oos=new ObjectOutputStream(socket.getOutputStream());
+			// ois=new ObjectInputStream(socket.getInputStream());
 		}catch(Exception e){
 			System.out.println("Could not connect to Server");
 		}
