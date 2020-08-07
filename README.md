@@ -1,15 +1,6 @@
 # SecureChat
-TODO persistent login - remember me for a month
-DONE - TODO rsa encryption - end to end 
-TODO self-destructing messages
-TODO add tor support
 
-Whenever a new person signs up
-a public-private key pair is generated
-public is stored in server
-private is stored in client device
+SecureChat is an End-to-End encrypted Peer-to-Peer Chat Application that has many security features like Hashed Password Storage, End-to-End encryption, Anonymous IP
 
-To redeem messages, decrypt using your private key
-To send messages, encrypt using receivers public key
-
-TODO - Separate Client database from Server Database
+Technologies Used - Java, JavaFx, MySQL
+Algorithms Used - RSA Encryption, SHA256 Hashing
